@@ -1,21 +1,22 @@
 // src/workflow.js
 const apiHelper = require('./apiHelper');
+const configService = require('./configService');
 
-// 从环境变量加载模型配置和提示词
-const thinkModel = process.env.ThinkModel;
-const thinkModelTemp = parseFloat(process.env.ThinkModelTemp);
-const thinkModelMaxTokens = parseInt(process.env.ThinkModelMaxTokens);
-const fastModel = process.env.FastModel;
-const fastModelTemp = parseFloat(process.env.FastModelTemp);
-const fastModelMaxTokens = parseInt(process.env.FastModelMaxTokens);
+// 从 configService 动态加载模型配置和提示词，移除顶部缓存
+// const thinkModel = process.env.ThinkModel;
+// const thinkModelTemp = parseFloat(process.env.ThinkModelTemp);
+// const thinkModelMaxTokens = parseInt(process.env.ThinkModelMaxTokens);
+// const fastModel = process.env.FastModel;
+// const fastModelTemp = parseFloat(process.env.FastModelTemp);
+// const fastModelMaxTokens = parseInt(process.env.FastModelMaxTokens);
 
-const deepResearchPrompt = process.env.DeepResearchPrompt;
-const choicePrompt = process.env.ChoicePrompt;
-const realSearchPrompt = process.env.RealSearchPrompt;
-const deepJudgePrompt = process.env.DeepJudgePrompt;
-const paperGenerationPrompt = process.env.PaperGenerationPrompt;
-const timePromptTemplate = process.env.TimePrompt; // 新增：加载时间提示模板
-const deepLoopLimit = parseInt(process.env.DeepLoop) || 5; // 读取深度上限，默认5
+// const deepResearchPrompt = process.env.DeepResearchPrompt;
+// const choicePrompt = process.env.ChoicePrompt;
+// const realSearchPrompt = process.env.RealSearchPrompt;
+// const deepJudgePrompt = process.env.DeepJudgePrompt;
+// const paperGenerationPrompt = process.env.PaperGenerationPrompt;
+// const timePromptTemplate = process.env.TimePrompt; // 新增：加载时间提示模板
+// const deepLoopLimit = parseInt(process.env.DeepLoop) || 5; // 读取深度上限，默认5
 
 // --- 工作流状态管理 ---
 let currentState = 'INITIAL_CHAT'; // 'INITIAL_CHAT', 'GENERATING_KEYWORDS', 'SEARCHING', 'JUDGING_DEPTH', 'GENERATING_REPORT', 'FINISHED'
@@ -49,6 +50,7 @@ function addMessageToHistory(role, content, modelType = 'think') {
 
 // --- Helper Function: Get Formatted Time Prompt ---
 function getFormattedTimePrompt() {
+    const timePromptTemplate = configService.get('TimePrompt', '');
     if (!timePromptTemplate) {
         return ""; // 如果模板未定义，返回空字符串
     }
@@ -125,6 +127,7 @@ async function handleMessage(userMessage) {
 
 // --- Helper Function: Call Think Model with Search Handling ---
 async function callThinkModelWithSearchHandling(messages, temperature, maxTokens) {
+    const thinkModel = configService.get('ThinkModel', '');
     console.log(`Calling ThinkModel (${thinkModel}) with potential search...`);
     let apiReply = await apiHelper.callApi(thinkModel, messages, temperature, maxTokens, true); // Enable search tool
 
@@ -158,6 +161,9 @@ async function handleInitialChat() {
     console.log('Workflow State: INITIAL_CHAT');
     // 与 NovaAI (ThinkModel) 交互
     const timePrefix = getFormattedTimePrompt();
+    const deepResearchPrompt = configService.get('DeepResearchPrompt', '');
+    const thinkModelTemp = parseFloat(configService.get('ThinkModelTemp', '0.7'));
+    const thinkModelMaxTokens = parseInt(configService.get('ThinkModelMaxTokens', '4096'));
     const initialMessages = [
         { role: 'system', content: timePrefix + deepResearchPrompt }, // 注入时间提示
         // 只发送用户和助手的历史记录给API
@@ -202,6 +208,10 @@ async function generateKeywords() {
 
     // 准备给关键词生成器的消息 (FastModel)
     const timePrefix = getFormattedTimePrompt();
+    const choicePrompt = configService.get('ChoicePrompt', '');
+    const fastModel = configService.get('FastModel', '');
+    const fastModelTemp = parseFloat(configService.get('FastModelTemp', '0.7'));
+    const fastModelMaxTokens = parseInt(configService.get('FastModelMaxTokens', '4096'));
     const keywordGenMessages = [
         { role: 'system', content: timePrefix + choicePrompt }, // 注入时间提示
         { role: 'user', content: `这是研究计划，请根据此计划生成搜索关键词:\n${researchPlan}` }
@@ -247,6 +257,10 @@ async function searchSingleKeyword(keyword) {
     addMessageToHistory('system', `开始搜索关键词: [[${keyword}]]`, 'system');
 
     const timePrefix = getFormattedTimePrompt();
+    const realSearchPrompt = configService.get('RealSearchPrompt', '');
+    const fastModel = configService.get('FastModel', '');
+    const fastModelTemp = parseFloat(configService.get('FastModelTemp', '0.7'));
+    const fastModelMaxTokens = parseInt(configService.get('FastModelMaxTokens', '4096'));
     const searchMessages = [
         { role: 'system', content: timePrefix + realSearchPrompt.replace('[[keyword]]', `[[${keyword}]]`) }, // 注入时间提示
         { role: 'user', content: `用户最初的研究需求: ${conversationHistory.find(m => m.role === 'user')?.content || '未知'}\n请专门搜索关于 [[${keyword}]] 的信息。` }
@@ -370,6 +384,9 @@ async function judgeDepth() {
 
     // ThinkModel 看完整的 conversationHistory
     const timePrefix = getFormattedTimePrompt();
+    const deepJudgePrompt = configService.get('DeepJudgePrompt', '');
+    const thinkModelTemp = parseFloat(configService.get('ThinkModelTemp', '0.7'));
+    const thinkModelMaxTokens = parseInt(configService.get('ThinkModelMaxTokens', '4096'));
     const judgeMessages = [
         { role: 'system', content: timePrefix.trim() }, // 时间提示作为第一个系统消息
         ...conversationHistory.filter(m => m.role === 'user' || m.role === 'assistant'), // 用户和助手的对话历史
@@ -385,6 +402,7 @@ async function judgeDepth() {
         addMessageToHistory('assistant', `深度判断器 (循环 ${researchLoopCount}):\n${judgeReply.content}`, 'think');
 
         // 优先检查循环上限
+        const deepLoopLimit = parseInt(configService.get('DeepLoop', '5'));
         if (researchLoopCount >= deepLoopLimit) {
             console.log(`Deep research loop limit (${deepLoopLimit}) reached. Forcing report generation.`);
             currentState = 'GENERATING_REPORT';
@@ -471,6 +489,10 @@ async function generateReport() {
         console.log(`Final report context length (approx chars): ${finalReportContext.length}`);
 
         const timePrefix = getFormattedTimePrompt();
+        const paperGenerationPrompt = configService.get('PaperGenerationPrompt', '');
+        const thinkModel = configService.get('ThinkModel', '');
+        const thinkModelTemp = parseFloat(configService.get('ThinkModelTemp', '0.7'));
+        const thinkModelMaxTokens = parseInt(configService.get('ThinkModelMaxTokens', '4096'));
         const reportMessages = [
             { role: 'system', content: timePrefix + paperGenerationPrompt }, // 注入时间提示
             { role: 'user', content: finalReportContext }

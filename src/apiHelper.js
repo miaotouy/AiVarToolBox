@@ -1,8 +1,11 @@
 const axios = require('axios');
 
-// 从环境变量加载配置
-const API_URL = process.env.API_URL;
-const API_Key = process.env.API_Key;
+const configService = require('./configService');
+
+// 从 configService 动态读取配置，不在顶部缓存
+// 原代码:
+// const API_URL = process.env.API_URL;
+// const API_Key = process.env.API_Key;
 
 /**
  * 调用 OpenAI 兼容的聊天 API
@@ -16,13 +19,15 @@ const API_Key = process.env.API_Key;
  *                          失败时: { type: 'error', error: '...' }
  */
 async function callApi(modelName, messages, temperature, maxTokens, useSearchTool = false) {
-    if (!API_URL || !API_Key) {
-        console.error('API_URL or API_Key is missing in environment variables.');
+    const apiUrl = configService.get('API_URL');
+    const apiKey = configService.get('API_Key');
+    if (!apiUrl || !apiKey) {
+        console.error('API_URL or API_Key is missing in configuration.');
         return { type: 'error', error: 'API configuration is missing.' };
     }
 
     const headers = {
-        'Authorization': `Bearer ${API_Key}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
     };
 
@@ -59,7 +64,7 @@ async function callApi(modelName, messages, temperature, maxTokens, useSearchToo
     // console.log('First Request Body:', JSON.stringify(firstRequestBody, null, 2));
 
     try {
-        let response = await axios.post(`${API_URL}/v1/chat/completions`, firstRequestBody, { headers });
+        let response = await axios.post(`${apiUrl}/v1/chat/completions`, firstRequestBody, { headers });
         // console.log('First API Response:', JSON.stringify(response.data, null, 2));
 
         if (!response.data || !response.data.choices || response.data.choices.length === 0) {
@@ -107,7 +112,7 @@ async function callApi(modelName, messages, temperature, maxTokens, useSearchToo
             console.log(`Calling API (2nd call): ${modelName} with ${messagesForSecondCall.length} messages.`);
             // console.log('Second Request Body:', JSON.stringify(secondRequestBody, null, 2));
 
-            response = await axios.post(`${API_URL}/v1/chat/completions`, secondRequestBody, { headers });
+            response = await axios.post(`${apiUrl}/v1/chat/completions`, secondRequestBody, { headers });
             // console.log('Second API Response:', JSON.stringify(response.data, null, 2));
 
             if (!response.data || !response.data.choices || response.data.choices.length === 0) {

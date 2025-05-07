@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>配置页面</h1>
+    <form id="configForm">
+        <label for="apiKey">API Key:</label>
+        <input type="text" id="apiKey" name="API_Key">
+
+        <label for="apiUrl">API URL:</label>
+        <input type="text" id="apiUrl" name="API_URL">
+
+        <label for="imageKey">Image Key:</label>
+        <input type="text" id="imageKey" name="Image_Key">
+
+        <label for="port">Port:</label>
+        <input type="number" id="port" name="Port">
+
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="Key">
+
+        <label for="varSystemInfo">Var System Info:</label>
+        <textarea id="varSystemInfo" name="VarSystemInfo"></textarea>
+
+        <label for="varWeatherInfo">Var Weather Info:</label>
+        <input type="text" id="varWeatherInfo" name="VarWeatherInfo">
+
+        <label for="varCity">Var City:</label>
+        <input type="text" id="varCity" name="VarCity">
+
+        <label for="varUser">Var User:</label>
+        <textarea id="varUser" name="VarUser"></textarea>
+
+        <label for="varEmojiPrompt">Var Emoji Prompt:</label>
+        <textarea id="varEmojiPrompt" name="VarEmojiPrompt"></textarea>
+
+        <label for="varHttpUrl">Var Http Url:</label>
+        <input type="text" id="varHttpUrl" name="VarHttpUrl">
+
+        <label for="varHttpsUrl">Var Https Url:</label>
+        <input type="text" id="varHttpsUrl" name="VarHttpsUrl">
+
+        <label for="varDdnsUrl">Var Ddns Url:</label>
+        <input type="text" id="varDdnsUrl" name="VarDdnsUrl">
+
+        <label for="weatherModel">Weather Model:</label>
+        <input type="text" id="weatherModel" name="WeatherModel">
+
+        <label for="weatherPrompt">Weather Prompt:</label>
+        <textarea id="weatherPrompt" name="WeatherPrompt"></textarea>
+
+        <label for="weatherModelMaxTokens">Weather Model Max Tokens:</label>
+        <input type="number" id="weatherModelMaxTokens" name="WeatherModelMaxTokens">
+
+        <label for="detector1">Detector 1:</label>
+        <textarea id="detector1" name="Detector1"></textarea>
+
+        <label for="detectorOutput1">Detector Output 1:</label>
+        <textarea id="detectorOutput1" name="Detector_Output1"></textarea>
+
+        <label for="detector2">Detector 2:</label>
+        <textarea id="detector2" name="Detector2"></textarea>
+
+        <label for="detectorOutput2">Detector Output 2:</label>
+        <textarea id="detectorOutput2" name="Detector_Output2"></textarea>
+
+        <label for="detector3">Detector 3:</label>
+        <textarea id="detector3" name="Detector3"></textarea>
+
+        <label for="detectorOutput3">Detector Output 3:</label>
+        <textarea id="detectorOutput3" name="Detector_Output3"></textarea>
+
+        <label for="superDetector1">Super Detector 1:</label>
+        <textarea id="superDetector1" name="SuperDetector1"></textarea>
+
+        <label for="superDetectorOutput1">Super Detector Output 1:</label>
+        <textarea id="superDetectorOutput1" name="SuperDetector_Output1"></textarea>
+
+        <label for="base64Cache">Base64 Cache:</label>
+        <input type="checkbox" id="base64Cache" name="Base64Cache">
+
+        <label for="imageModel">Image Model:</label>
+        <input type="text" id="imageModel" name="ImageModel">
+
+        <label for="imagePrompt">Image Prompt:</label>
+        <textarea id="imagePrompt" name="ImagePrompt"></textarea>
+
+        <label for="imageModelOutput">Image Model Output:</label>
+        <input type="number" id="imageModelOutput" name="ImageModelOutput">
+
+        <label for="imageModelContent">Image Model Content:</label>
+        <input type="number" id="imageModelContent" name="ImageModelContent">
+
+        <label for="imageModelThinkingBudget">Image Model Thinking Budget:</label>
+        <input type="number" id="imageModelThinkingBudget" name="ImageModelThinkingBudget">
+
+        <button type="submit">保存配置</button>
+    </form>
+    <script src="js/config.js" defer></script>
+</body>
+</html>

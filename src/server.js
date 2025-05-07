@@ -1,13 +1,15 @@
 // 加载环境变量
 const path = require('path'); // 确保 path 模块在 dotenv 之前引入
 require('dotenv').config({ path: path.resolve(__dirname, '../config.env') }); // 使用绝对路径加载 .env
+const configService = require('./configService'); // 引入配置服务模块
+configService.init(); // 初始化配置服务，加载配置
 
 const express = require('express');
 // const path = require('path'); // path 已在上面引入
 const workflow = require('./workflow'); // 引入工作流逻辑
 
 const app = express();
-const port = process.env.PORT || 3001; // 使用环境变量或默认端口
+const port = configService.get('PORT', 3001); // 使用配置服务获取端口号，默认值为 3001
 
 // 中间件
 app.use(express.json()); // 解析 JSON 请求体
@@ -85,11 +87,36 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
+// 配置页面路由，提供 config.html
+app.get('/config', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public', 'config.html'));
+});
+
+// 获取当前配置 API
+app.get('/api/config', (req, res) => {
+    const allConfig = configService.getAll();
+    // 暂时不处理 requiresRestart 标记，因为 configService.isRestartRequired 是占位符
+    res.json(allConfig);
+});
+
+// 更新配置 API (目前仅更新内存)
+app.post('/api/config', (req, res) => {
+    const newSettings = req.body;
+    configService.update(newSettings)
+        .then(() => {
+            res.json({ message: "配置更新已启动 (目前仅在内存中生效)。" });
+        })
+        .catch(error => {
+            console.error('更新配置时出错:', error);
+            res.status(500).json({ error: '更新配置失败。' });
+        });
+});
+
 // 启动服务器
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
-    console.log('API Key:', process.env.API_Key ? 'Loaded' : 'Not Loaded!'); // 检查 API Key 是否加载
-    console.log('API URL:', process.env.API_URL);
-    console.log('Think Model:', process.env.ThinkModel);
-    console.log('Fast Model:', process.env.FastModel);
+    console.log('API Key:', configService.get('API_Key') ? 'Loaded' : 'Not Loaded!'); // 检查 API Key 是否加载
+    console.log('API URL:', configService.get('API_URL'));
+    console.log('Think Model:', configService.get('ThinkModel'));
+    console.log('Fast Model:', configService.get('FastModel'));
 });
