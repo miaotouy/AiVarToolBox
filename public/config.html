@@ -14,13 +14,18 @@
             margin: 0 auto;
         }
         label {
-            display: block;
+            display: inline-block; /* Changed for side-by-side notice */
             margin-top: 10px;
+            margin-right: 5px; /* Space before input */
         }
-        input[type="text"], input[type="number"], textarea {
-            width: 100%;
+        input[type="text"], input[type="number"], textarea, input[type="checkbox"] {
+            /* width: 100%; */ /* Adjusted for inline display */
             padding: 8px;
             margin-top: 5px;
+            vertical-align: middle; /* Align checkbox with label */
+        }
+        input[type="text"], input[type="number"], textarea {
+             width: calc(100% - 20px); /* Adjust width considering padding */
         }
         textarea {
             height: 100px;
@@ -36,100 +41,296 @@
         button:hover {
             background-color: #0056b3;
         }
+        .config-item {
+            margin-bottom: 10px;
+            /* border-bottom: 1px solid #eee; */
+            /* padding-bottom: 10px; */
+        }
+        .config-item label {
+            font-weight: bold;
+        }
+        .restart-notice {
+            color: orange;
+            font-size: 0.9em;
+            margin-left: 10px;
+            font-style: italic;
+        }
+        .field-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .field-container label {
+            flex-basis: 200px; /* Adjust as needed */
+            margin-right: 10px;
+        }
+        .field-container input, .field-container textarea {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .field-container .restart-notice {
+            flex-basis: 150px; /* Adjust as needed */
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
     <h1>配置页面</h1>
     <form id="configForm">
-        <label for="apiKey">API Key:</label>
-        <input type="text" id="apiKey" name="API_Key">
+        <div class="config-item field-container">
+            <label for="API_Key">API Key:</label>
+            <input type="text" id="API_Key" name="API_Key">
+            <span class="restart-notice" id="API_Key_restart_notice"></span>
+        </div>
 
-        <label for="apiUrl">API URL:</label>
-        <input type="text" id="apiUrl" name="API_URL">
+        <div class="config-item field-container">
+            <label for="API_URL">API URL:</label>
+            <input type="text" id="API_URL" name="API_URL">
+            <span class="restart-notice" id="API_URL_restart_notice"></span>
+        </div>
 
-        <label for="imageKey">Image Key:</label>
-        <input type="text" id="imageKey" name="Image_Key">
+        <div class="config-item field-container">
+            <label for="Image_Key">Image Key:</label>
+            <input type="text" id="Image_Key" name="Image_Key">
+            <span class="restart-notice" id="Image_Key_restart_notice"></span>
+        </div>
 
-        <label for="port">Port:</label>
-        <input type="number" id="port" name="Port">
+        <div class="config-item field-container">
+            <label for="Port">Port:</label>
+            <input type="number" id="Port" name="Port">
+            <span class="restart-notice" id="Port_restart_notice"></span>
+        </div>
 
-        <label for="key">Key:</label>
-        <input type="text" id="key" name="Key">
+        <div class="config-item field-container">
+            <label for="Key">Key (Server Auth):</label>
+            <input type="text" id="Key" name="Key">
+            <span class="restart-notice" id="Key_restart_notice"></span>
+        </div>
 
-        <label for="varSystemInfo">Var System Info:</label>
-        <textarea id="varSystemInfo" name="VarSystemInfo"></textarea>
+        <div class="config-item field-container">
+            <label for="VarSystemInfo">Var System Info:</label>
+            <textarea id="VarSystemInfo" name="VarSystemInfo"></textarea>
+            <span class="restart-notice" id="VarSystemInfo_restart_notice"></span>
+        </div>
 
-        <label for="varWeatherInfo">Var Weather Info:</label>
-        <input type="text" id="varWeatherInfo" name="VarWeatherInfo">
+        <div class="config-item field-container">
+            <label for="VarWeatherInfo">Var Weather Info (File Path):</label>
+            <input type="text" id="VarWeatherInfo" name="VarWeatherInfo">
+            <span class="restart-notice" id="VarWeatherInfo_restart_notice"></span>
+        </div>
 
-        <label for="varCity">Var City:</label>
-        <input type="text" id="varCity" name="VarCity">
+        <div class="config-item field-container">
+            <label for="VarCity">Var City:</label>
+            <input type="text" id="VarCity" name="VarCity">
+            <span class="restart-notice" id="VarCity_restart_notice"></span>
+        </div>
 
-        <label for="varUser">Var User:</label>
-        <textarea id="varUser" name="VarUser"></textarea>
+        <div class="config-item field-container">
+            <label for="VarUser">Var User:</label>
+            <textarea id="VarUser" name="VarUser"></textarea>
+            <span class="restart-notice" id="VarUser_restart_notice"></span>
+        </div>
 
-        <label for="varEmojiPrompt">Var Emoji Prompt:</label>
-        <textarea id="varEmojiPrompt" name="VarEmojiPrompt"></textarea>
+        <div class="config-item field-container">
+            <label for="VarEmojiPrompt">Var Emoji Prompt:</label>
+            <textarea id="VarEmojiPrompt" name="VarEmojiPrompt"></textarea>
+            <span class="restart-notice" id="VarEmojiPrompt_restart_notice"></span>
+        </div>
 
-        <label for="varHttpUrl">Var Http Url:</label>
-        <input type="text" id="varHttpUrl" name="VarHttpUrl">
+        <div class="config-item field-container">
+            <label for="VarHttpUrl">Var Http Url:</label>
+            <input type="text" id="VarHttpUrl" name="VarHttpUrl">
+            <span class="restart-notice" id="VarHttpUrl_restart_notice"></span>
+        </div>
 
-        <label for="varHttpsUrl">Var Https Url:</label>
-        <input type="text" id="varHttpsUrl" name="VarHttpsUrl">
+        <div class="config-item field-container">
+            <label for="VarHttpsUrl">Var Https Url:</label>
+            <input type="text" id="VarHttpsUrl" name="VarHttpsUrl">
+            <span class="restart-notice" id="VarHttpsUrl_restart_notice"></span>
+        </div>
 
-        <label for="varDdnsUrl">Var Ddns Url:</label>
-        <input type="text" id="varDdnsUrl" name="VarDdnsUrl">
+        <div class="config-item field-container">
+            <label for="VarDdnsUrl">Var Ddns Url:</label>
+            <input type="text" id="VarDdnsUrl" name="VarDdnsUrl">
+            <span class="restart-notice" id="VarDdnsUrl_restart_notice"></span>
+        </div>
 
-        <label for="weatherModel">Weather Model:</label>
-        <input type="text" id="weatherModel" name="WeatherModel">
+        <div class="config-item field-container">
+            <label for="WeatherModel">Weather Model:</label>
+            <input type="text" id="WeatherModel" name="WeatherModel">
+            <span class="restart-notice" id="WeatherModel_restart_notice"></span>
+        </div>
 
-        <label for="weatherPrompt">Weather Prompt:</label>
-        <textarea id="weatherPrompt" name="WeatherPrompt"></textarea>
+        <div class="config-item field-container">
+            <label for="WeatherPrompt">Weather Prompt:</label>
+            <textarea id="WeatherPrompt" name="WeatherPrompt"></textarea>
+            <span class="restart-notice" id="WeatherPrompt_restart_notice"></span>
+        </div>
 
-        <label for="weatherModelMaxTokens">Weather Model Max Tokens:</label>
-        <input type="number" id="weatherModelMaxTokens" name="WeatherModelMaxTokens">
+        <div class="config-item field-container">
+            <label for="WeatherModelMaxTokens">Weather Model Max Tokens:</label>
+            <input type="number" id="WeatherModelMaxTokens" name="WeatherModelMaxTokens">
+            <span class="restart-notice" id="WeatherModelMaxTokens_restart_notice"></span>
+        </div>
 
-        <label for="detector1">Detector 1:</label>
-        <textarea id="detector1" name="Detector1"></textarea>
+        <div class="config-item field-container">
+            <label for="Detector1">Detector 1:</label>
+            <textarea id="Detector1" name="Detector1"></textarea>
+            <span class="restart-notice" id="Detector1_restart_notice"></span>
+        </div>
 
-        <label for="detectorOutput1">Detector Output 1:</label>
-        <textarea id="detectorOutput1" name="Detector_Output1"></textarea>
+        <div class="config-item field-container">
+            <label for="Detector_Output1">Detector Output 1:</label>
+            <textarea id="Detector_Output1" name="Detector_Output1"></textarea>
+            <span class="restart-notice" id="Detector_Output1_restart_notice"></span>
+        </div>
 
-        <label for="detector2">Detector 2:</label>
-        <textarea id="detector2" name="Detector2"></textarea>
+        <div class="config-item field-container">
+            <label for="Detector2">Detector 2:</label>
+            <textarea id="Detector2" name="Detector2"></textarea>
+            <span class="restart-notice" id="Detector2_restart_notice"></span>
+        </div>
 
-        <label for="detectorOutput2">Detector Output 2:</label>
-        <textarea id="detectorOutput2" name="Detector_Output2"></textarea>
+        <div class="config-item field-container">
+            <label for="Detector_Output2">Detector Output 2:</label>
+            <textarea id="Detector_Output2" name="Detector_Output2"></textarea>
+            <span class="restart-notice" id="Detector_Output2_restart_notice"></span>
+        </div>
 
-        <label for="detector3">Detector 3:</label>
-        <textarea id="detector3" name="Detector3"></textarea>
+        <div class="config-item field-container">
+            <label for="Detector3">Detector 3:</label>
+            <textarea id="Detector3" name="Detector3"></textarea>
+            <span class="restart-notice" id="Detector3_restart_notice"></span>
+        </div>
 
-        <label for="detectorOutput3">Detector Output 3:</label>
-        <textarea id="detectorOutput3" name="Detector_Output3"></textarea>
+        <div class="config-item field-container">
+            <label for="Detector_Output3">Detector Output 3:</label>
+            <textarea id="Detector_Output3" name="Detector_Output3"></textarea>
+            <span class="restart-notice" id="Detector_Output3_restart_notice"></span>
+        </div>
 
-        <label for="superDetector1">Super Detector 1:</label>
-        <textarea id="superDetector1" name="SuperDetector1"></textarea>
+        <div class="config-item field-container">
+            <label for="SuperDetector1">Super Detector 1:</label>
+            <textarea id="SuperDetector1" name="SuperDetector1"></textarea>
+            <span class="restart-notice" id="SuperDetector1_restart_notice"></span>
+        </div>
 
-        <label for="superDetectorOutput1">Super Detector Output 1:</label>
-        <textarea id="superDetectorOutput1" name="SuperDetector_Output1"></textarea>
+        <div class="config-item field-container">
+            <label for="SuperDetector_Output1">Super Detector Output 1:</label>
+            <textarea id="SuperDetector_Output1" name="SuperDetector_Output1"></textarea>
+            <span class="restart-notice" id="SuperDetector_Output1_restart_notice"></span>
+        </div>
 
-        <label for="base64Cache">Base64 Cache:</label>
-        <input type="checkbox" id="base64Cache" name="Base64Cache">
+        <div class="config-item field-container">
+            <label for="ClearBase64ImageAfterProcessing">Clear Base64 Image After Processing:</label>
+            <input type="checkbox" id="ClearBase64ImageAfterProcessing" name="ClearBase64ImageAfterProcessing">
+            <span class="restart-notice" id="ClearBase64ImageAfterProcessing_restart_notice"></span>
+        </div>
 
-        <label for="imageModel">Image Model:</label>
-        <input type="text" id="imageModel" name="ImageModel">
+        <div class="config-item field-container">
+            <label for="ImageModel">Image Model:</label>
+            <input type="text" id="ImageModel" name="ImageModel">
+            <span class="restart-notice" id="ImageModel_restart_notice"></span>
+        </div>
 
-        <label for="imagePrompt">Image Prompt:</label>
-        <textarea id="imagePrompt" name="ImagePrompt"></textarea>
+        <div class="config-item field-container">
+            <label for="ImagePrompt">Image Prompt:</label>
+            <textarea id="ImagePrompt" name="ImagePrompt"></textarea>
+            <span class="restart-notice" id="ImagePrompt_restart_notice"></span>
+        </div>
 
-        <label for="imageModelOutput">Image Model Output:</label>
-        <input type="number" id="imageModelOutput" name="ImageModelOutput">
+        <div class="config-item field-container">
+            <label for="ImageModelOutput">Image Model Output (Max Tokens):</label>
+            <input type="number" id="ImageModelOutput" name="ImageModelOutput">
+            <span class="restart-notice" id="ImageModelOutput_restart_notice"></span>
+        </div>
 
-        <label for="imageModelContent">Image Model Content:</label>
-        <input type="number" id="imageModelContent" name="ImageModelContent">
+        <div class="config-item field-container">
+            <label for="ImageModelContent">Image Model Content (Unused):</label>
+            <input type="number" id="ImageModelContent" name="ImageModelContent">
+            <span class="restart-notice" id="ImageModelContent_restart_notice"></span>
+        </div>
 
-        <label for="imageModelThinkingBudget">Image Model Thinking Budget:</label>
-        <input type="number" id="imageModelThinkingBudget" name="ImageModelThinkingBudget">
+        <div class="config-item field-container">
+            <label for="ImageModelThinkingBudget">Image Model Thinking Budget:</label>
+            <input type="number" id="ImageModelThinkingBudget" name="ImageModelThinkingBudget">
+            <span class="restart-notice" id="ImageModelThinkingBudget_restart_notice"></span>
+        </div>
+        
+        <div class="config-item field-container">
+            <label for="ImageModelAsynchronous">Image Model Asynchronous Limit:</label>
+            <input type="number" id="ImageModelAsynchronous" name="ImageModelAsynchronous">
+            <span class="restart-notice" id="ImageModelAsynchronous_restart_notice"></span>
+        </div>
+
+        <div class="config-item field-container">
+            <label for="DeepLoop">Deep Research Loop Limit:</label>
+            <input type="number" id="DeepLoop" name="DeepLoop">
+            <span class="restart-notice" id="DeepLoop_restart_notice"></span>
+        </div>
+
+        <div class="config-item field-container">
+            <label for="ThinkModel">Think Model:</label>
+            <input type="text" id="ThinkModel" name="ThinkModel">
+            <span class="restart-notice" id="ThinkModel_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="ThinkModelTemp">Think Model Temperature:</label>
+            <input type="number" id="ThinkModelTemp" name="ThinkModelTemp" step="0.1">
+            <span class="restart-notice" id="ThinkModelTemp_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="ThinkModelMaxTokens">Think Model Max Tokens:</label>
+            <input type="number" id="ThinkModelMaxTokens" name="ThinkModelMaxTokens">
+            <span class="restart-notice" id="ThinkModelMaxTokens_restart_notice"></span>
+        </div>
+
+        <div class="config-item field-container">
+            <label for="FastModel">Fast Model:</label>
+            <input type="text" id="FastModel" name="FastModel">
+            <span class="restart-notice" id="FastModel_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="FastModelTemp">Fast Model Temperature:</label>
+            <input type="number" id="FastModelTemp" name="FastModelTemp" step="0.1">
+            <span class="restart-notice" id="FastModelTemp_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="FastModelMaxTokens">Fast Model Max Tokens:</label>
+            <input type="number" id="FastModelMaxTokens" name="FastModelMaxTokens">
+            <span class="restart-notice" id="FastModelMaxTokens_restart_notice"></span>
+        </div>
+
+        <div class="config-item field-container">
+            <label for="DeepResearchPrompt">Deep Research Prompt:</label>
+            <textarea id="DeepResearchPrompt" name="DeepResearchPrompt"></textarea>
+            <span class="restart-notice" id="DeepResearchPrompt_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="ChoicePrompt">Choice Prompt (Keyword Gen):</label>
+            <textarea id="ChoicePrompt" name="ChoicePrompt"></textarea>
+            <span class="restart-notice" id="ChoicePrompt_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="RealSearchPrompt">Real Search Prompt:</label>
+            <textarea id="RealSearchPrompt" name="RealSearchPrompt"></textarea>
+            <span class="restart-notice" id="RealSearchPrompt_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="DeepJudgePrompt">Deep Judge Prompt:</label>
+            <textarea id="DeepJudgePrompt" name="DeepJudgePrompt"></textarea>
+            <span class="restart-notice" id="DeepJudgePrompt_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="PaperGenerationPrompt">Paper Generation Prompt:</label>
+            <textarea id="PaperGenerationPrompt" name="PaperGenerationPrompt"></textarea>
+            <span class="restart-notice" id="PaperGenerationPrompt_restart_notice"></span>
+        </div>
+        <div class="config-item field-container">
+            <label for="TimePrompt">Time Prompt Template:</label>
+            <textarea id="TimePrompt" name="TimePrompt"></textarea>
+            <span class="restart-notice" id="TimePrompt_restart_notice"></span>
+        </div>
 
         <button type="submit">保存配置</button>
     </form>

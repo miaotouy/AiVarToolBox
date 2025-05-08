@@ -94,9 +94,17 @@ app.get('/config', (req, res) => {
 
 // 获取当前配置 API
 app.get('/api/config', (req, res) => {
-    const allConfig = configService.getAll();
-    // 暂时不处理 requiresRestart 标记，因为 configService.isRestartRequired 是占位符
-    res.json(allConfig);
+    const allConfigRaw = configService.getAll();
+    const allConfigWithRestartInfo = {};
+    for (const key in allConfigRaw) {
+        if (allConfigRaw.hasOwnProperty(key)) {
+            allConfigWithRestartInfo[key] = {
+                value: allConfigRaw[key],
+                requiresRestart: configService.isRestartRequired(key)
+            };
+        }
+    }
+    res.json(allConfigWithRestartInfo);
 });
 
 // 更新配置 API (目前仅更新内存)
@@ -104,11 +112,20 @@ app.post('/api/config', (req, res) => {
     const newSettings = req.body;
     configService.update(newSettings)
         .then(() => {
-            res.json({ message: "配置更新已启动 (目前仅在内存中生效)。" });
+            const updatedKeys = Object.keys(newSettings);
+            const restartNeededKeys = updatedKeys.filter(key => configService.isRestartRequired(key));
+
+            let message = "配置已成功更新。";
+            if (restartNeededKeys.length > 0) {
+                message += ` 以下更改需要重启服务器才能生效: ${restartNeededKeys.join(', ')}。`;
+            } else {
+                message += " 所有更改已热更新生效。";
+            }
+            res.json({ message: message, restartNeededKeys: restartNeededKeys });
         })
         .catch(error => {
             console.error('更新配置时出错:', error);
-            res.status(500).json({ error: '更新配置失败。' });
+            res.status(500).json({ error: '更新配置失败。', details: error.message });
         });
 });
 

@@ -62,6 +62,10 @@ function get(key, defaultValue = undefined) {
         // 理论上 init 应该在应用启动时调用，这里加个提醒
         console.warn('咕咕：警告 - 尝试在 ConfigService.init() 完成前调用 get()。可能导致配置不准确。');
     }
+    if (key === 'ClearBase64ImageAfterProcessing' && !currentConfig.hasOwnProperty(key) && currentConfig.hasOwnProperty('Base64Cache')) {
+        console.log("咕咕：兼容旧配置项 Base64Cache，读取其值用于 ClearBase64ImageAfterProcessing");
+        return currentConfig['Base64Cache'];
+    }
     return currentConfig.hasOwnProperty(key) ? currentConfig[key] : defaultValue;
 }
 
@@ -83,14 +87,28 @@ function getAll() {
  * @returns {Promise<void>}
  */
 async function update(newSettings) {
-    console.log('咕咕：ConfigService.update() 被调用，参数:', newSettings);
+    console.log('咕咕：ConfigService.update() 被调用，原始参数:', JSON.parse(JSON.stringify(newSettings))); // 打印原始参数的深拷贝
     const customConfigPath = path.resolve(process.cwd(), 'config.custom.json');
+    
+    // 创建一个要保存的配置副本，以处理名称迁移
+    let settingsToSave = { ...newSettings };
+
+    // 处理 Base64Cache 到 ClearBase64ImageAfterProcessing 的迁移
+    if (settingsToSave.hasOwnProperty('Base64Cache')) {
+        console.log("咕咕：检测到旧配置项 Base64Cache，将迁移到 ClearBase64ImageAfterProcessing");
+        settingsToSave['ClearBase64ImageAfterProcessing'] = settingsToSave['Base64Cache'];
+        delete settingsToSave['Base64Cache'];
+        console.log("咕咕：已将 Base64Cache 的值赋给 ClearBase64ImageAfterProcessing，并移除 Base64Cache");
+    }
+    
+    console.log('咕咕：ConfigService.update() 准备写入的配置:', settingsToSave);
+
     try {
-        // 将新配置写入 config.custom.json 文件
-        await fs.promises.writeFile(customConfigPath, JSON.stringify(newSettings, null, 2), { encoding: 'utf8' });
+        // 将处理后的配置写入 config.custom.json 文件
+        await fs.promises.writeFile(customConfigPath, JSON.stringify(settingsToSave, null, 2), { encoding: 'utf8' });
         console.log('咕咕：成功写入 config.custom.json');
         // 重新初始化配置以刷新内存中的 currentConfig
-        await init();
+        await init(); // init 内部会重新加载 base 和 custom，并合并
         console.log('咕咕：内存配置已刷新');
     } catch (error) {
         console.error('咕咕：更新配置出错:', error);
@@ -105,8 +123,9 @@ async function update(newSettings) {
  */
 function isRestartRequired(key) {
     console.log('咕咕：ConfigService.isRestartRequired() 被调用，参数:', key);
+    const restartRequiredKeys = ['PORT']; // 未来可以扩展这个列表
     // 根据配置项生效方式列表，判断是否需要重启服务器
-    return key === 'PORT';
+    return restartRequiredKeys.includes(key);
 }
 
 module.exports = {
